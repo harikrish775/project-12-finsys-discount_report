@@ -1052,7 +1052,9 @@ urlpatterns = [
     # < ------------- Harikrishnan -------- > Reports - Discount Reports < ------------------------------- >
     path('Fin_discount_report',views.Fin_discount_report,name="Fin_discount_report"),
     path('discount_report_date_filter',views.discount_report_date_filter,name="discount_report_date_filter"),
-    # path('aaa',views.aaa,name="aaa"),
+    path('sendEmail_discount_report',views.sendEmail_discount_report,name="sendEmail_discount_report"),
+
+    path('testmail',views.testmail,name="testmail"),
     # path('aaa',views.aaa,name="aaa"),
     
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
