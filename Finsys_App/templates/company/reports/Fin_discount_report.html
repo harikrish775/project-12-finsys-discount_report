@@ -171,7 +171,7 @@
                 <center>
                     <!-- <h5 style="padding-top: 10px;">{{cmp.Company_name}}</h5> -->
                     <h2 class="text-uppercase" id="headline">Discount Report</h2>
-                    <b id="datefilter"></b>
+                    <b id="datefilter" style="display: none;"></b>
                 </center>
                 <hr>
             </div>
@@ -208,7 +208,7 @@
                     <button class="btn btn_print btn-outline-info" onclick="window.print()">Print</button>
                     <button class=" btn btn-outline-info" id="export-button" onclick="exportAsExcel()">Excel</button> -->
                     <a class="btn btn-outline-secondary text-grey fa fa-file" role="button" id="pdfBtn" onclick="reportPDF()"> &nbsp;PDF</a> 
-                    <a class="ml-2 btn btn-outline-secondary text-grey fa fa-print" role="button" id="printBtn" onclick="printSection('printReport')">&nbsp;Print</a>
+                    <a class="ml-2 btn btn-outline-secondary text-grey fa fa-print" role="button" id="printBtn" onclick="printSection('printdiv2')">&nbsp;Print</a>
                     <a class="ml-2 btn btn-outline-secondary text-grey fa fa-table" role="button" id="exportBtn" onclick="ExportToExcel()">&nbsp;Export</a>
                     <div class="dropdown p-0 nav-item"  id="shareBtn">
                         <li  class="ml-2 dropdown-toggle btn btn-outline-secondary text-grey fa fa-share-alt" data-toggle="dropdown">&nbsp;Share</li>
@@ -230,12 +230,12 @@
                 <div  id="printReport"  class="printReportTemplate" style="display: block;">
                     <div class="my-5 page" size="A4" >
                         <div id="printdiv2">
-                            <div class="py-4 bg-secondary" >
+                            <div class="py-4 bg-secondary" id="tableHead">
                                 <!-- <div id="ember2512" class="col-md-4 d-flex justify-content-start tooltip-container ember-view ribbon text-ellipsis"></div> -->
-                                <div class="col-12" id="tableHead">
-                                        <center class="h5 text-white"><b>{{cmp.Company_name}}</b></center>
-                                        <center class="h3 text-white"><b>Discount Report</b></center>
-                                        <center><b id="datefilter2"></b></center>
+                                <div class="col-12" >
+                                        <center class="h5 text-white" ><b style="color: white;">{{cmp.Company_name}}</b></center>
+                                        <center class="h3 text-white"><b style="color: white;">Discount Report</b></center>
+                                        <center><b id="datefilter2" style="color: white;"></b></center>
                                         
                                 </div>  
                                 <!-- <div class="col-md-4 d-flex justify-content-end"></div> -->
@@ -362,9 +362,11 @@ function discount_report_date_filter() {
             if (data && data.stocklist && Array.isArray(data.stocklist)) {
                 tbody.innerHTML = ''; // Clear existing rows
                 data.stocklist.forEach(function(item) {
-                    
+                    var date = new Date(item[0]);
+                    var options = { year: 'numeric', month: 'long', day: 'numeric' };
+                    var formattedDate = date.toLocaleDateString(undefined, options);
                     var newRow = `<tr>
-                                <td class="text-center" style="color: black;width: 16%;">${item[0]}</td>
+                                <td class="text-center" style="color: black;width: 16%;">${formattedDate}</td>
                                 <td class="text-center" style="color: black;width: 16%;">${item[1]}</td>
                                 <td class="text-center" style="color: black;width: 16%;">${item[2]}</td>
                                 <td class="text-center" style="color: black;width: 16%;">${item[3]}</td>
@@ -505,7 +507,7 @@ function calculateTotalDiscount() {
     })
 
     function reportPDF(){
-        var element = document.getElementById('printReport');
+        var element = document.getElementById('printdiv2');
         var opt =
         {
             margin: [0.5, 0.3, 0.3, 0.5],
@@ -518,24 +520,27 @@ function calculateTotalDiscount() {
     }
 
     function printSection(sectionId) {
+
+    // Store the tableHead element and its original class list
+    var tableHead = document.getElementById('tableHead');
+    var originalClasses = tableHead.className;
+
+    // Remove the bg-secondary class before printing
+    tableHead.classList.remove('bg-secondary');
+    
     // Store the original background color
     var originalBackgroundColor = document.body.style.backgroundColor;
-
+    
     // Change the background color to white for printing
     document.body.style.backgroundColor = 'white';
     
-    // Store the original font color of tableHead
-    var tableHeadElements = document.getElementById('tableHead');
-    var originalFontColors = [];
-    tableHeadElements.style.color = 'white';
-
     var printContents = document.getElementById(sectionId).innerHTML;
     var originalContents = document.body.innerHTML;
     var $printerDiv = $('<div class="printContainer"></div>');
-
+    
     $printerDiv.html(printContents);
     $('body').append($printerDiv).addClass("printingContent");
-
+    
     // Use a setTimeout to ensure the print dialog opens before changes are reverted
     setTimeout(function() {
         window.print();
@@ -547,12 +552,11 @@ function calculateTotalDiscount() {
         // Revert the background color to its original state
         document.body.style.backgroundColor = originalBackgroundColor;
         
-        // Revert the font color of tableHead to its original color
-        tableHeadElements.forEach(function(element, index) {
-            element.style.color = originalFontColors[index];
-        });
+        // Add the bg-secondary class back to the tableHead
+        tableHead.className = originalClasses;
     }, 0);
 }
+
 
 
 

@@ -49525,57 +49525,72 @@ def Fin_discount_report(request):
         
         allmodules = Fin_Modules_List.objects.get(company_id = cmp,status = 'New')
         customer = Fin_Customers.objects.filter(Company=cmp)
+        vendor = Fin_Vendors.objects.filter(Company=cmp)
         newArray = []
 
         for i in customer:
             fullname = i.first_name + ' ' + i.last_name
             invoice = Fin_Invoice.objects.filter(Company=cmp,Customer=i)
-            invdiscount = 0
+            
             if invoice:
                 for inv in invoice:
                     invitems = Fin_Invoice_Items.objects.filter(Invoice=inv)
+                    invdiscount = 0
                     for dis in invitems:
                         invdiscount += dis.discount
-                    newArray.append((inv.invoice_date,fullname,'Invoice',inv.invoice_no,invdiscount,0.00))
+                    if invdiscount != 0:
+                        newArray.append((inv.invoice_date,fullname,'Invoice',inv.invoice_no,invdiscount,0.00))
             
             rec_invoice = Fin_Recurring_Invoice.objects.filter(Company=cmp,Customer=i)
-            recdiscount = 0
+            
             if rec_invoice:
                 for rec in rec_invoice:
                     recitems = Fin_Recurring_Invoice_Items.objects.filter(RecInvoice=rec)
+                    recdiscount = 0
                     for dis in recitems:
                         recdiscount += dis.discount
-                    newArray.append((rec.start_date,fullname,'Recurring Invoice',rec.rec_invoice_no,recdiscount,0.00))
+                    if recdiscount != 0:
+                        newArray.append((rec.start_date,fullname,'Recurring Invoice',rec.rec_invoice_no,recdiscount,0.00))
 
             ret_invoice = Fin_Retainer_Invoice.objects.filter(Company=cmp,Customer=i)
-            retdiscount = 0
+            
             if ret_invoice:
                 for ret in ret_invoice:
                     retitems = Fin_Retainer_Invoice_Items.objects.filter(Ret_Inv=ret)
+                    retdiscount = 0
                     for dis in retitems:
                         retdiscount += dis.discount
-                    newArray.append((ret.Retainer_Invoice_date,fullname,'Retainer Invoice',ret.Retainer_Invoice_number,retdiscount,0.00))
-
-            bill = Fin_Purchase_Bill.objects.filter(company=cmp,customer=i)
-            billdiscount = 0
+                    if retdiscount != 0:
+                        newArray.append((ret.Retainer_Invoice_date,fullname,'Retainer Invoice',ret.Retainer_Invoice_number,retdiscount,0.00))
+            
+        
+        for i in vendor:
+            fullname2 = i.first_name + ' ' + i.last_name
+            bill = Fin_Purchase_Bill.objects.filter(company=cmp,vendor=i)
+            
             if bill:
                 for b in bill:
                     billitems = Fin_Purchase_Bill_Item.objects.filter(pbill=b)
+                    billdiscount = 0
                     for dis in billitems:
                         billdiscount += int(dis.discount)
-                    newArray.append((b.bill_date,fullname,'Bill',b.bill_no,0.00,billdiscount))
+                    if billdiscount != 0:
+                        newArray.append((b.bill_date,fullname2,'Bill',b.bill_no,0.00,billdiscount))
 
-            recbill = Fin_Recurring_Bills.objects.filter(company=cmp,customer=i)
-            recbilldiscount = 0
+            recbill = Fin_Recurring_Bills.objects.filter(company=cmp,vendor=i)
+            
             if recbill:
                 for rb in recbill:
                     recbillitems = Fin_Recurring_Bill_Items.objects.filter(recurring_bill=rb)
+                    recbilldiscountf = 0
                     for dis in recbillitems:
-                        recbilldiscount += dis.discount
-                    newArray.append((rb.date,fullname,'Recurring Bill',rb.recurring_bill_number,0.00,billdiscount))
-        
+                        recbilldiscountf += dis.discount
+                    if recbilldiscountf != 0:
+                        newArray.append((rb.date,fullname2,'Recurring Bill',rb.recurring_bill_number,0.00,recbilldiscountf))
+
         context = {
             'allmodules':allmodules, 'cmp':cmp,'newArray':newArray,
+            'com':com, 'data':data,
         }
         return render(request,'company/reports/Fin_Discount_Report.html', context)
     else:
@@ -49595,54 +49610,69 @@ def discount_report_date_filter(request):
             cmp = com.company_id
         
         customer = Fin_Customers.objects.filter(Company=cmp)
+        vendor = Fin_Vendors.objects.filter(Company=cmp)
+
         newArray = []
 
         for i in customer:
             fullname = i.first_name + ' ' + i.last_name
             invoice = Fin_Invoice.objects.filter(Company=cmp,Customer=i,invoice_date__gte=fromDate,invoice_date__lte=toDate)
-            invdiscount = 0
+            
             if invoice:
                 for inv in invoice:
                     invitems = Fin_Invoice_Items.objects.filter(Invoice=inv)
+                    invdiscount = 0
                     for dis in invitems:
                         invdiscount += dis.discount
-                    newArray.append((inv.invoice_date,fullname,'Invoice',inv.invoice_no,invdiscount,0.00))
+                    if invdiscount != 0:
+                        newArray.append((inv.invoice_date,fullname,'Invoice',inv.invoice_no,invdiscount,0.00))
             
             rec_invoice = Fin_Recurring_Invoice.objects.filter(Company=cmp,Customer=i,start_date__gte=fromDate,start_date__lte=toDate)
-            recdiscount = 0
+            
             if rec_invoice:
                 for rec in rec_invoice:
                     recitems = Fin_Recurring_Invoice_Items.objects.filter(RecInvoice=rec)
+                    recdiscount = 0
                     for dis in recitems:
                         recdiscount += dis.discount
-                    newArray.append((rec.start_date,fullname,'Recurring Invoice',rec.rec_invoice_no,recdiscount,0.00))
+                    if recdiscount != 0:
+                        newArray.append((rec.start_date,fullname,'Recurring Invoice',rec.rec_invoice_no,recdiscount,0.00))
 
             ret_invoice = Fin_Retainer_Invoice.objects.filter(Company=cmp,Customer=i,Retainer_Invoice_date__gte=fromDate,Retainer_Invoice_date__lte=toDate)
-            retdiscount = 0
+            
             if ret_invoice:
                 for ret in ret_invoice:
                     retitems = Fin_Retainer_Invoice_Items.objects.filter(Ret_Inv=ret)
+                    retdiscount = 0
                     for dis in retitems:
                         retdiscount += dis.discount
-                    newArray.append((ret.Retainer_Invoice_date,fullname,'Retainer Invoice',ret.Retainer_Invoice_number,retdiscount,0.00))
+                    if retdiscount != 0:
+                        newArray.append((ret.Retainer_Invoice_date,fullname,'Retainer Invoice',ret.Retainer_Invoice_number,retdiscount,0.00))
 
-            bill = Fin_Purchase_Bill.objects.filter(company=cmp,customer=i,bill_date__gte=fromDate,bill_date__lte=toDate)
-            billdiscount = 0
+            
+        for i in vendor:
+            fullname2 = i.first_name + ' ' + i.last_name
+            bill = Fin_Purchase_Bill.objects.filter(company=cmp,vendor=i,bill_date__gte=fromDate,bill_date__lte=toDate)
+            
             if bill:
                 for b in bill:
                     billitems = Fin_Purchase_Bill_Item.objects.filter(pbill=b)
+                    billdiscount = 0
                     for dis in billitems:
                         billdiscount += int(dis.discount)
-                    newArray.append((b.bill_date,fullname,'Bill',b.bill_no,0.00,billdiscount))
+                    if billdiscount != 0:
+                        newArray.append((b.bill_date,fullname2,'Bill',b.bill_no,0.00,billdiscount))
 
-            recbill = Fin_Recurring_Bills.objects.filter(company=cmp,customer=i,date__gte=fromDate,date__lte=toDate) 
-            recbilldiscount = 0
+            recbill = Fin_Recurring_Bills.objects.filter(company=cmp,vendor=i,date__gte=fromDate,date__lte=toDate) 
+            
             if recbill:
                 for rb in recbill:
                     recbillitems = Fin_Recurring_Bill_Items.objects.filter(recurring_bill=rb)
+                    recbilldiscountf = 0
                     for dis in recbillitems:
-                        recbilldiscount += dis.discount
-                    newArray.append((rb.date,fullname,'Recurring Bill',rb.recurring_bill_number,0.00,billdiscount))
+                        recbilldiscountf += dis.discount
+                    if recbilldiscountf != 0:
+                        newArray.append((rb.date,fullname2,'Recurring Bill',rb.recurring_bill_number,0.00,recbilldiscountf))
 
         context={
         'stocklist':newArray,
@@ -49673,102 +49703,127 @@ def sendEmail_discount_report(request):
                 purDis = request.POST.get('purdiscount')
                 
                 customer = Fin_Customers.objects.filter(Company=cmp)
+                vendor = Fin_Vendors.objects.filter(Company=cmp)
                 newArray = []
 
                 if fromDate != None and toDate != None:
                     for i in customer:
                         fullname = i.first_name + ' ' + i.last_name
                         invoice = Fin_Invoice.objects.filter(Company=cmp,Customer=i,invoice_date__gte=fromDate,invoice_date__lte=toDate)
-                        invdiscount = 0
+                        
                         if invoice:
                             for inv in invoice:
                                 invitems = Fin_Invoice_Items.objects.filter(Invoice=inv)
+                                invdiscount = 0
                                 for dis in invitems:
                                     invdiscount += dis.discount
-                                newArray.append((inv.invoice_date,fullname,'Invoice',inv.invoice_no,invdiscount,0.00))
+                                if invdiscount != 0:
+                                    newArray.append((inv.invoice_date,fullname,'Invoice',inv.invoice_no,invdiscount,0.00))
                         
                         rec_invoice = Fin_Recurring_Invoice.objects.filter(Company=cmp,Customer=i,start_date__gte=fromDate,start_date__lte=toDate)
-                        recdiscount = 0
+                        
                         if rec_invoice:
                             for rec in rec_invoice:
                                 recitems = Fin_Recurring_Invoice_Items.objects.filter(RecInvoice=rec)
+                                recdiscount = 0
                                 for dis in recitems:
                                     recdiscount += dis.discount
-                                newArray.append((rec.start_date,fullname,'Recurring Invoice',rec.rec_invoice_no,recdiscount,0.00))
+                                if recdiscount != 0:
+                                    newArray.append((rec.start_date,fullname,'Recurring Invoice',rec.rec_invoice_no,recdiscount,0.00))
 
                         ret_invoice = Fin_Retainer_Invoice.objects.filter(Company=cmp,Customer=i,Retainer_Invoice_date__gte=fromDate,Retainer_Invoice_date__lte=toDate)
-                        retdiscount = 0
+                        
                         if ret_invoice:
                             for ret in ret_invoice:
                                 retitems = Fin_Retainer_Invoice_Items.objects.filter(Ret_Inv=ret)
+                                retdiscount = 0
                                 for dis in retitems:
                                     retdiscount += dis.discount
-                                newArray.append((ret.Retainer_Invoice_date,fullname,'Retainer Invoice',ret.Retainer_Invoice_number,retdiscount,0.00))
+                                if retdiscount != 0:
+                                    newArray.append((ret.Retainer_Invoice_date,fullname,'Retainer Invoice',ret.Retainer_Invoice_number,retdiscount,0.00))
 
-                        bill = Fin_Purchase_Bill.objects.filter(company=cmp,customer=i,bill_date__gte=fromDate,bill_date__lte=toDate)
-                        billdiscount = 0
+                    for i in vendor:
+                        fullname2 = i.first_name + ' ' + i.last_name
+                        bill = Fin_Purchase_Bill.objects.filter(company=cmp,vendor=i,bill_date__gte=fromDate,bill_date__lte=toDate)
+                        
                         if bill:
                             for b in bill:
                                 billitems = Fin_Purchase_Bill_Item.objects.filter(pbill=b)
+                                billdiscount = 0
                                 for dis in billitems:
                                     billdiscount += int(dis.discount)
-                                newArray.append((b.bill_date,fullname,'Bill',b.bill_no,0.00,billdiscount))
+                                if billdiscount != 0:
+                                    newArray.append((b.bill_date,fullname2,'Bill',b.bill_no,0.00,billdiscount))
 
-                        recbill = Fin_Recurring_Bills.objects.filter(company=cmp,customer=i,date__gte=fromDate,date__lte=toDate) 
-                        recbilldiscount = 0
+                        recbill = Fin_Recurring_Bills.objects.filter(company=cmp,vendor=i,date__gte=fromDate,date__lte=toDate) 
+                        
                         if recbill:
                             for rb in recbill:
                                 recbillitems = Fin_Recurring_Bill_Items.objects.filter(recurring_bill=rb)
+                                recbilldiscountf = 0
                                 for dis in recbillitems:
-                                    recbilldiscount += dis.discount
-                                newArray.append((rb.date,fullname,'Recurring Bill',rb.recurring_bill_number,0.00,billdiscount))
+                                    recbilldiscountf += dis.discount
+                                if recbilldiscountf != 0:
+                                    newArray.append((rb.date,fullname2,'Recurring Bill',rb.recurring_bill_number,0.00,recbilldiscountf))
                 else:
                     for i in customer:
                         fullname = i.first_name + ' ' + i.last_name
                         invoice = Fin_Invoice.objects.filter(Company=cmp,Customer=i)
-                        invdiscount = 0
+                        
                         if invoice:
                             for inv in invoice:
                                 invitems = Fin_Invoice_Items.objects.filter(Invoice=inv)
+                                invdiscount = 0
                                 for dis in invitems:
                                     invdiscount += dis.discount
-                                newArray.append((inv.invoice_date,fullname,'Invoice',inv.invoice_no,invdiscount,0.00))
+                                if invdiscount != 0:
+                                    newArray.append((inv.invoice_date,fullname,'Invoice',inv.invoice_no,invdiscount,0.00))
                         
                         rec_invoice = Fin_Recurring_Invoice.objects.filter(Company=cmp,Customer=i)
-                        recdiscount = 0
+                        
                         if rec_invoice:
                             for rec in rec_invoice:
                                 recitems = Fin_Recurring_Invoice_Items.objects.filter(RecInvoice=rec)
+                                recdiscount = 0
                                 for dis in recitems:
                                     recdiscount += dis.discount
-                                newArray.append((rec.start_date,fullname,'Recurring Invoice',rec.rec_invoice_no,recdiscount,0.00))
+                                if recdiscount != 0:
+                                    newArray.append((rec.start_date,fullname,'Recurring Invoice',rec.rec_invoice_no,recdiscount,0.00))
 
                         ret_invoice = Fin_Retainer_Invoice.objects.filter(Company=cmp,Customer=i)
-                        retdiscount = 0
+                        
                         if ret_invoice:
                             for ret in ret_invoice:
                                 retitems = Fin_Retainer_Invoice_Items.objects.filter(Ret_Inv=ret)
+                                retdiscount = 0
                                 for dis in retitems:
                                     retdiscount += dis.discount
-                                newArray.append((ret.Retainer_Invoice_date,fullname,'Retainer Invoice',ret.Retainer_Invoice_number,retdiscount,0.00))
+                                if retdiscount != 0:
+                                    newArray.append((ret.Retainer_Invoice_date,fullname,'Retainer Invoice',ret.Retainer_Invoice_number,retdiscount,0.00))
 
-                        bill = Fin_Purchase_Bill.objects.filter(company=cmp,customer=i)
-                        billdiscount = 0
+                    for i in vendor:
+                        fullname2 = i.first_name + ' ' + i.last_name
+                        bill = Fin_Purchase_Bill.objects.filter(company=cmp,vendor=i)
+                        
                         if bill:
                             for b in bill:
                                 billitems = Fin_Purchase_Bill_Item.objects.filter(pbill=b)
+                                billdiscount = 0
                                 for dis in billitems:
                                     billdiscount += int(dis.discount)
-                                newArray.append((b.bill_date,fullname,'Bill',b.bill_no,0.00,billdiscount))
+                                if billdiscount != 0:
+                                    newArray.append((b.bill_date,fullname2,'Bill',b.bill_no,0.00,billdiscount))
 
-                        recbill = Fin_Recurring_Bills.objects.filter(company=cmp,customer=i)
-                        recbilldiscount = 0
+                        recbill = Fin_Recurring_Bills.objects.filter(company=cmp,vendor=i)
+                        
                         if recbill:
                             for rb in recbill:
                                 recbillitems = Fin_Recurring_Bill_Items.objects.filter(recurring_bill=rb)
+                                recbilldiscountf = 0
                                 for dis in recbillitems:
-                                    recbilldiscount += dis.discount
-                                newArray.append((rb.date,fullname,'Recurring Bill',rb.recurring_bill_number,0.00,billdiscount))
+                                    recbilldiscountf += dis.discount
+                                if recbilldiscountf != 0:
+                                    newArray.append((rb.date,fullname2,'Recurring Bill',rb.recurring_bill_number,0.00,recbilldiscountf))
 
                 
                 context = {'newArray':newArray,'cmp':cmp,'companyName':cmp.Company_name,
@@ -49828,96 +49883,116 @@ def testmail(request):
                     for i in customer:
                         fullname = i.first_name + ' ' + i.last_name
                         invoice = Fin_Invoice.objects.filter(Company=cmp,Customer=i,invoice_date__gte=fromDate,invoice_date__lte=toDate)
-                        invdiscount = 0
+                        
                         if invoice:
                             for inv in invoice:
                                 invitems = Fin_Invoice_Items.objects.filter(Invoice=inv)
+                                invdiscount = 0
                                 for dis in invitems:
                                     invdiscount += dis.discount
-                                newArray.append((inv.invoice_date,fullname,'Invoice',inv.invoice_no,invdiscount,0.00))
+                                if invdiscount != 0:
+                                    newArray.append((inv.invoice_date,fullname,'Invoice',inv.invoice_no,invdiscount,0.00))
                         
                         rec_invoice = Fin_Recurring_Invoice.objects.filter(Company=cmp,Customer=i,start_date__gte=fromDate,start_date__lte=toDate)
-                        recdiscount = 0
+                        
                         if rec_invoice:
                             for rec in rec_invoice:
                                 recitems = Fin_Recurring_Invoice_Items.objects.filter(RecInvoice=rec)
+                                recdiscount = 0
                                 for dis in recitems:
                                     recdiscount += dis.discount
-                                newArray.append((rec.start_date,fullname,'Recurring Invoice',rec.rec_invoice_no,recdiscount,0.00))
+                                if recdiscount != 0:
+                                    newArray.append((rec.start_date,fullname,'Recurring Invoice',rec.rec_invoice_no,recdiscount,0.00))
 
                         ret_invoice = Fin_Retainer_Invoice.objects.filter(Company=cmp,Customer=i,Retainer_Invoice_date__gte=fromDate,Retainer_Invoice_date__lte=toDate)
-                        retdiscount = 0
+                        
                         if ret_invoice:
                             for ret in ret_invoice:
                                 retitems = Fin_Retainer_Invoice_Items.objects.filter(Ret_Inv=ret)
+                                retdiscount = 0
                                 for dis in retitems:
                                     retdiscount += dis.discount
-                                newArray.append((ret.Retainer_Invoice_date,fullname,'Retainer Invoice',ret.Retainer_Invoice_number,retdiscount,0.00))
+                                if retdiscount != 0:
+                                    newArray.append((ret.Retainer_Invoice_date,fullname,'Retainer Invoice',ret.Retainer_Invoice_number,retdiscount,0.00))
 
                         bill = Fin_Purchase_Bill.objects.filter(company=cmp,customer=i,bill_date__gte=fromDate,bill_date__lte=toDate)
-                        billdiscount = 0
+                        
                         if bill:
                             for b in bill:
                                 billitems = Fin_Purchase_Bill_Item.objects.filter(pbill=b)
+                                billdiscount = 0
                                 for dis in billitems:
                                     billdiscount += int(dis.discount)
-                                newArray.append((b.bill_date,fullname,'Bill',b.bill_no,0.00,billdiscount))
+                                if billdiscount != 0:
+                                    newArray.append((b.bill_date,fullname,'Bill',b.bill_no,0.00,billdiscount))
 
                         recbill = Fin_Recurring_Bills.objects.filter(company=cmp,customer=i,date__gte=fromDate,date__lte=toDate) 
-                        recbilldiscount = 0
+                        
                         if recbill:
                             for rb in recbill:
                                 recbillitems = Fin_Recurring_Bill_Items.objects.filter(recurring_bill=rb)
+                                recbilldiscountf = 0
                                 for dis in recbillitems:
-                                    recbilldiscount += dis.discount
-                                newArray.append((rb.date,fullname,'Recurring Bill',rb.recurring_bill_number,0.00,billdiscount))
+                                    recbilldiscountf += dis.discount
+                                if recbilldiscountf != 0:
+                                    newArray.append((rb.date,fullname,'Recurring Bill',rb.recurring_bill_number,0.00,billdiscount))
                 else:
                     for i in customer:
                         fullname = i.first_name + ' ' + i.last_name
                         invoice = Fin_Invoice.objects.filter(Company=cmp,Customer=i)
-                        invdiscount = 0
+                        
                         if invoice:
                             for inv in invoice:
                                 invitems = Fin_Invoice_Items.objects.filter(Invoice=inv)
+                                invdiscount = 0
                                 for dis in invitems:
                                     invdiscount += dis.discount
-                                newArray.append((inv.invoice_date,fullname,'Invoice',inv.invoice_no,invdiscount,0.00))
+                                if invdiscount != 0:
+                                    newArray.append((inv.invoice_date,fullname,'Invoice',inv.invoice_no,invdiscount,0.00))
                         
                         rec_invoice = Fin_Recurring_Invoice.objects.filter(Company=cmp,Customer=i)
-                        recdiscount = 0
+                        
                         if rec_invoice:
                             for rec in rec_invoice:
                                 recitems = Fin_Recurring_Invoice_Items.objects.filter(RecInvoice=rec)
+                                recdiscount = 0
                                 for dis in recitems:
                                     recdiscount += dis.discount
-                                newArray.append((rec.start_date,fullname,'Recurring Invoice',rec.rec_invoice_no,recdiscount,0.00))
+                                if recdiscount != 0:
+                                    newArray.append((rec.start_date,fullname,'Recurring Invoice',rec.rec_invoice_no,recdiscount,0.00))
 
                         ret_invoice = Fin_Retainer_Invoice.objects.filter(Company=cmp,Customer=i)
-                        retdiscount = 0
+                        
                         if ret_invoice:
                             for ret in ret_invoice:
                                 retitems = Fin_Retainer_Invoice_Items.objects.filter(Ret_Inv=ret)
+                                retdiscount = 0
                                 for dis in retitems:
                                     retdiscount += dis.discount
-                                newArray.append((ret.Retainer_Invoice_date,fullname,'Retainer Invoice',ret.Retainer_Invoice_number,retdiscount,0.00))
+                                if retdiscount != 0:
+                                    newArray.append((ret.Retainer_Invoice_date,fullname,'Retainer Invoice',ret.Retainer_Invoice_number,retdiscount,0.00))
 
                         bill = Fin_Purchase_Bill.objects.filter(company=cmp,customer=i)
-                        billdiscount = 0
+                        
                         if bill:
                             for b in bill:
                                 billitems = Fin_Purchase_Bill_Item.objects.filter(pbill=b)
+                                billdiscount = 0
                                 for dis in billitems:
                                     billdiscount += int(dis.discount)
-                                newArray.append((b.bill_date,fullname,'Bill',b.bill_no,0.00,billdiscount))
+                                if billdiscount != 0:
+                                    newArray.append((b.bill_date,fullname,'Bill',b.bill_no,0.00,billdiscount))
 
                         recbill = Fin_Recurring_Bills.objects.filter(company=cmp,customer=i)
-                        recbilldiscount = 0
+                        
                         if recbill:
                             for rb in recbill:
                                 recbillitems = Fin_Recurring_Bill_Items.objects.filter(recurring_bill=rb)
+                                recbilldiscountf = 0
                                 for dis in recbillitems:
-                                    recbilldiscount += dis.discount
-                                newArray.append((rb.date,fullname,'Recurring Bill',rb.recurring_bill_number,0.00,billdiscount))
+                                    recbilldiscountf += dis.discount
+                                if recbilldiscountf != 0:
+                                    newArray.append((rb.date,fullname,'Recurring Bill',rb.recurring_bill_number,0.00,billdiscount))
 
                 
                 context = {'newArray':newArray,'cmp':cmp,'companyName':cmp.Company_name,

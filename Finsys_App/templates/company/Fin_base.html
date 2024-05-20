@@ -735,7 +735,7 @@
               <div class="menu-title">Reports</div>
             </a>
             <ul class="submenu">
-              <li id="stocksummary"><a href="{% url 'Fin_discount_report' %}"><i class="bx bx-right-arrow-alt"></i>Discount Report </a></li>
+              <li id="discountreport"><a href="{% url 'Fin_discount_report' %}"><i class="bx bx-right-arrow-alt"></i>Discount Report </a></li>
               <li id="transactonreport">
                 <a><i class="bx bx-right-arrow-alt"></i>Transaction Reports</a>
                 <ul class="px-4">
@@ -788,6 +788,7 @@
                   <li><a href="{% url 'sale_summary_byHSN' %}"></i>Sale Summary by HSN</a></li>
                 </ul>
               </li>
+              
               <li id="accountsreceivables">
                 <a><i class="bx bx-right-arrow-alt"></i>Accounts Receivable</a>
                 <ul class="px-4">
@@ -837,13 +838,14 @@
                   <a href="{% url 'Fin_ewayBillReport' %}"><i class="bx bx-right-arrow-alt"></i>EWay Bill Report </a>
                 </li>
                 <li id="stocksummary"><a href="{% url 'Fin_journel_report' %}"><i class="bx bx-right-arrow-alt"></i>Journal Report </a></li>
+                
                 <li id="business">
                   <a><i class="bx bx-right-arrow-alt"></i>Business Status</a>
                   
                   <ul class="px-4">
                     <li><a href=""><i class="bx bx-right-arrow-alt"></i> Bank Statement</a></li>
                     <li><a href=""><i class="bx bx-right-arrow-alt"></i> Loan Statement</a></li>
-                    <li><a href=""><i class="bx bx-right-arrow-alt"></i> Discount Report</a></li>
+                    <li id="discountreport"><a href="{% url 'Fin_discount_report' %}"><i class="bx bx-right-arrow-alt"></i>Discount Report </a></li>
                   </ul>
                 </li>
             </ul>
